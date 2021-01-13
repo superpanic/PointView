@@ -1,4 +1,4 @@
-# Build and run
+# Build and run:
 1. Download the Illustrator SDK  
 `https://console.adobe.io/downloads/ai`
 
@@ -10,7 +10,7 @@
 
 5. Restart Illustrator
 
-# Development Notes
+# Development Notes:
 
 # Additional preperation needed for HelloWorld project
 
@@ -48,7 +48,7 @@ For more information, see AINotifierSuite and AITimerSuite in Adobe Illustrator 
 Some message actions also are referred to as notifiers, indicating something in Illustrator was changed by the user; **for example, when the user selects an object.**
 Plug-ins must register for the notifiers in which they are interested. The Notifier suite is used to register and remove notification requests (see AINotifierSuite).
 
-# Suites
+# Suite examples
 
 **struct AIPathSuite**
 This suite provides functions that allow you to examine and manipulate paths, which are art objects of type kPathArt. More...
@@ -75,9 +75,6 @@ Parameters:
 view 	The view reference, or NULL for the current view.
 zoom 	[out] A buffer in which to return the zoom factor, a percentage value where 1 is 100% (actual size), 0.5 is 50% and 2 is 200%.  
 
-## TODO: Adding one suite to the HelloWorld plugin
-Setup the HelloWorld project, but naming the Plugin and project it `PointMarker`
-
 ## Plug-In Property List
 PiPL seems important. All plug-ins need a PiPL that describes the plugin type etc.
 It seems like all the sample projects share a PiPL file in the `./../common/mac` folder.
@@ -85,7 +82,6 @@ It seems like all the sample projects share a PiPL file in the `./../common/mac`
 ## Plug-ing code entry point
 By convention, the entry point is called `PluginMain` and is compiled with C linkage:  
 `extern "C" ASAPI ASErr PluginMain(char* caller, char* selector, void* message);`
-
 
 All plugin's recieve at least four message actions (during it's lifetime):  
 `reload`  
@@ -96,11 +92,9 @@ All plugin's recieve at least four message actions (during it's lifetime):
 `reload` seems to be called before `startup`
 and probably `unload` before `shutdown`?
 
-
 ## PICA means the host application  
 
 ## Notifiers
 Plug-ins must register for the notifiers in which they are interested. The Notifier suite is used to register and remove notification requests (see `AINotifierSuite`).
-
 
 
