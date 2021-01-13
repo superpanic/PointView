@@ -3,26 +3,127 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 46;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		359F95E125AB64CB001E5826 /* PointView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 359F95E025AB64CB001E5826 /* PointView.cpp */; };
+		359F95E325AB6514001E5826 /* IAIUnicodeString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 359F95E225AB6514001E5826 /* IAIUnicodeString.cpp */; };
+		359F95E625AB66D8001E5826 /* PointView.r in Rez */ = {isa = PBXBuildFile; fileRef = 359F95E425AB653C001E5826 /* PointView.r */; };
+		359F95E925AB66F5001E5826 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 359F95E825AB66F5001E5826 /* CoreFoundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		359F95D925AB631C001E5826 /* PointView.aip */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PointView.aip; sourceTree = BUILT_PRODUCTS_DIR; };
+		359F95DC25AB631C001E5826 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		359F95E025AB64CB001E5826 /* PointView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PointView.cpp; sourceTree = "<group>"; };
+		359F95E225AB6514001E5826 /* IAIUnicodeString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IAIUnicodeString.cpp; path = ../../../illustratorapi/illustrator/IAIUnicodeString.cpp; sourceTree = "<group>"; };
+		359F95E425AB653C001E5826 /* PointView.r */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.rez; path = PointView.r; sourceTree = "<group>"; };
+		359F95E825AB66F5001E5826 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		359F95D625AB631C001E5826 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				359F95E925AB66F5001E5826 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		359F95CC25AB62C0001E5826 = {
 			isa = PBXGroup;
 			children = (
+				359F95D425AB62E7001E5826 /* Resources */,
+				359F95D325AB62DC001E5826 /* Source */,
+				359F95DB25AB631C001E5826 /* PointView */,
+				359F95DA25AB631C001E5826 /* Products */,
+				359F95E725AB66F5001E5826 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
+		359F95D325AB62DC001E5826 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				359F95E225AB6514001E5826 /* IAIUnicodeString.cpp */,
+				359F95E025AB64CB001E5826 /* PointView.cpp */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		359F95D425AB62E7001E5826 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				359F95E425AB653C001E5826 /* PointView.r */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		359F95DA25AB631C001E5826 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				359F95D925AB631C001E5826 /* PointView.aip */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		359F95DB25AB631C001E5826 /* PointView */ = {
+			isa = PBXGroup;
+			children = (
+				359F95DC25AB631C001E5826 /* Info.plist */,
+			);
+			path = PointView;
+			sourceTree = "<group>";
+		};
+		359F95E725AB66F5001E5826 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				359F95E825AB66F5001E5826 /* CoreFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		359F95D825AB631C001E5826 /* PointView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 359F95DD25AB631C001E5826 /* Build configuration list for PBXNativeTarget "PointView" */;
+			buildPhases = (
+				359F95D525AB631C001E5826 /* Sources */,
+				359F95D625AB631C001E5826 /* Frameworks */,
+				359F95D725AB631C001E5826 /* Resources */,
+				359F95E525AB66CC001E5826 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PointView;
+			productName = PointView;
+			productReference = 359F95D925AB631C001E5826 /* PointView.aip */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		359F95CD25AB62C0001E5826 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1130;
+				TargetAttributes = {
+					359F95D825AB631C001E5826 = {
+						CreatedOnToolsVersion = 11.3;
+						DevelopmentTeam = 5R7N236Z28;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 359F95D025AB62C0001E5826 /* Build configuration list for PBXProject "PointView" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -30,23 +131,219 @@
 				Base,
 			);
 			mainGroup = 359F95CC25AB62C0001E5826;
+			productRefGroup = 359F95DA25AB631C001E5826 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				359F95D825AB631C001E5826 /* PointView */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		359F95D725AB631C001E5826 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		359F95E525AB66CC001E5826 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				359F95E625AB66D8001E5826 /* PointView.r in Rez */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		359F95D525AB631C001E5826 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				359F95E325AB6514001E5826 /* IAIUnicodeString.cpp in Sources */,
+				359F95E125AB64CB001E5826 /* PointView.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		359F95D125AB62C0001E5826 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				AI_CONFIGURATION = debug;
+				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKdebug.pch;
+				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../common/**",
+					"../../illustratorapi/**",
+					"/Developers/Headers/FlatCocoa/**",
+				);
+				INFOPLIST_FILE = ../common/mac/Info.plist;
+				INFOPLIST_PREFIX_HEADER = ../common/includes/SDKDef.h;
+				INFOPLIST_PREPROCESS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = .;
+				REZ_SEARCH_PATHS = ./../common/mac;
+				SDKROOT = macosx;
+				SYMROOT = "./../output/mac/$(AI_CONFIGURATION)";
+				WRAPPER_EXTENSION = aip;
 			};
 			name = Debug;
 		};
 		359F95D225AB62C0001E5826 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				AI_CONFIGURATION = release;
+				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKrelease.pch;
+				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../common/**",
+					"../../illustratorapi/**",
+					"/Developers/Headers/FlatCocoa/**",
+				);
+				INFOPLIST_FILE = ../common/mac/Info.plist;
+				INFOPLIST_PREFIX_HEADER = ../common/includes/SDKDef.h;
+				INFOPLIST_PREPROCESS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = .;
+				REZ_SEARCH_PATHS = ./../common/mac;
+				SDKROOT = macosx;
+				SYMROOT = "./../output/mac/$(AI_CONFIGURATION)";
+				WRAPPER_EXTENSION = aip;
+			};
+			name = Release;
+		};
+		359F95DE25AB631C001E5826 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 5R7N236Z28;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = PointView/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.superpanic.PointView;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = aip;
+			};
+			name = Debug;
+		};
+		359F95DF25AB631C001E5826 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5R7N236Z28;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = PointView/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.superpanic.PointView;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = aip;
 			};
 			name = Release;
 		};
@@ -58,6 +355,15 @@
 			buildConfigurations = (
 				359F95D125AB62C0001E5826 /* Debug */,
 				359F95D225AB62C0001E5826 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		359F95DD25AB631C001E5826 /* Build configuration list for PBXNativeTarget "PointView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				359F95DE25AB631C001E5826 /* Debug */,
+				359F95DF25AB631C001E5826 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
