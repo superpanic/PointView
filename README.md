@@ -1,4 +1,16 @@
+# Build and run
+1. Download the Illustrator SDK  
+`https://console.adobe.io/downloads/ai`
 
+2. Place project in the `samplecode` folder.
+
+3. Open Illustrator. Go to Preferences/Plug-Ins & Scrats Disks and set the additional plug-in:s folder to `SDK/samplecode/output`
+
+4. Build project
+
+5. Restart Illustrator
+
+# Development Notes
 
 # Additional preperation needed for HelloWorld project
 
