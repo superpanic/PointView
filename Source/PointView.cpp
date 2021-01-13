@@ -112,10 +112,12 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 					ai::int16 segments;
 					error = sAIPath->GetPathSegmentCount(art, &segments);
 					
-					if(error == kNoErr && closed)
+					if(error == kNoErr && closed) {
 						sprintf(artNote, "Closed, with %d segments.", segments);
-					else
+					} else {
+// TODO: the selected path is open find the in and out points print the positions to art object notes!
 						sprintf(artNote, "Open, with %d segments.", segments);
+					}
 					
 					error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
 				}
