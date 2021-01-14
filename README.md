@@ -98,3 +98,13 @@ and probably `unload` before `shutdown`?
 Plug-ins must register for the notifiers in which they are interested. The Notifier suite is used to register and remove notification requests (see `AINotifierSuite`).
 
 
+## AIAPI AIErr(* AIPathSuite::GetPathSegments)(AIArtHandle path, ai::int16 segNumber, ai::int16 count, AIPathSegment segments[])
+Retrieves a set of segments from a path.
+
+Parameters:
+path 	The path object.
+segNumber 	The 0-based index of the first segment.
+count 	The number of segments to retrieve.
+segments 	[out] An array in which to return the segments. You must allocate an array of AIPathSegment the size of count.
+
+# Should I allocate the array using the Illustrator memory allocation suite?
