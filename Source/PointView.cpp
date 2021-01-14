@@ -109,14 +109,20 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 					bool closed;
 					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
 					
-					ai::int16 segments;
-					error = sAIPath->GetPathSegmentCount(art, &segments);
+					ai::int16 segmentCount;
+					error = sAIPath->GetPathSegmentCount(art, &segmentCount);
 					
 					if(error == kNoErr && closed) {
-						sprintf(artNote, "Closed, with %d segments.", segments);
+						sprintf(artNote, "Closed, with %d segments.", segmentCount);
 					} else {
-// TODO: the selected path is open find the in and out points print the positions to art object notes!
-						sprintf(artNote, "Open, with %d segments.", segments);
+
+						// TODO: the selected path is open find the in and out points print the positions to art object notes!
+						AIPathSegment segments[1];
+						error = sAIPath->GetPathSegments(art, 0, 1, segments);
+						AIReal startPointH = segments[0].p.h;
+						AIReal startPointV = segments[0].p.v;
+						
+						sprintf(artNote, "Open, with %d segments. Start point at %lf %lf", segmentCount, startPointH, startPointV);
 					}
 					
 					error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
