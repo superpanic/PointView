@@ -113,18 +113,20 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 					error = sAIPath->GetPathSegmentCount(art, &segmentCount);
 					
 					if(error == kNoErr && closed) {
-						sprintf(artNote, "Closed, with %d segments.", segmentCount);
+						sprintf(artNote, "Closed, with %d points.", segmentCount);
 					} else {
 
 						// TODO: the selected path is open find the in and out points print the positions to art object notes!
-						AIPathSegment segments[1];
-						error = sAIPath->GetPathSegments(art, 0, 1, segments);
+						AIPathSegment segments[segmentCount];
+						error = sAIPath->GetPathSegments(art, 0, segmentCount, segments);
 						AIReal startPointH = segments[0].p.h;
 						AIReal startPointV = segments[0].p.v;
+						AIReal endPointH = segments[segmentCount-1].p.h;
+						AIReal endPointV = segments[segmentCount-1].p.v;
 						
-						sprintf(artNote, "Open, with %d segments. Start point at %lf %lf", segmentCount, startPointH, startPointV);
+						sprintf(artNote, "Open path, with %d points.\nStart point at %lf %lf\nEnd point at %lf %lf", segmentCount, startPointH, startPointV, endPointH, endPointV);
 					}
-					
+					// view any art object's note in the Attributes panel.
 					error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
 				}
 				
