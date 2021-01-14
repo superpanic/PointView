@@ -38,6 +38,8 @@ Set Rez Search Path to: `./../common/mac`
 (add (+) `Wrapper Extension` if property is missing!)  
 Set property value to: `aip`
 
+## Use notes for debug output
+I used the Attributes panel for debug output. Each Illustrator object can have a user note (string) that is displayed in the Attributes panel. This is usually empty, and can be set with `SetNote` from the `AIArtSuite`.
 
 # Plug-in notifiers and timers
 Plug-in notifiers and timers are used by a plug-in to have Illustrator inform it of certain events.
