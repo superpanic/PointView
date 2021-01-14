@@ -14,6 +14,8 @@
 
 # Additional preperation needed for HelloWorld project
 
+These things seems to be missing in the SDK documentation for the HelloWorld project setup for Macos Xcode.
+
 ## Add Core Foundation
 -> Targets  
 -> Build Phases  
@@ -25,6 +27,8 @@ Add (+): CoreFoundation.framework
 -> Build settings  
 -> Search Paths  
 Set Rez Search Path to: `./../common/mac`
+
+The following actually is in the documentation, but was missed by me and causing me trouble:
 
 ## When creating the Target (page 36), set the bundle extension to `aip` in the save dialogue  
 
