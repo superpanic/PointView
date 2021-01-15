@@ -13,7 +13,7 @@ I'm trying to build an Adobe Illustrator plug-in that visually displays path end
 
 5. Restart Illustrator
 
-# Additional preperation needed for successfully compiling the `HelloWorld` project
+# Additional setup needed for the HelloWorld project:
 
 ## Use Xcode 11.3  
 Do not use the latest Xcode.
