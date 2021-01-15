@@ -1,5 +1,5 @@
 # Currently work in progress:
-I'm trying to build an Adobe Illustrator plug-in that visually displays path endpoints. (A tool I need when editing imported CAD artwork.) The idea is to draw small circles or triangles around all open path's end points using the current layer specific selection color. The circles should not be part of the artwork, but is drawn on the UI layer; something I hope to accomplish using the AIAnnotationDrawerSuite.
+I'm trying to build an Adobe Illustrator plug-in that visually displays path endpoints. (A tool I need when editing imported CAD artwork.) The idea is to draw small circles around all open path's end points using the current layer specific selection color. The circles should not be part of the artwork, but is drawn on the UI layer; something I hope to accomplish using the AIAnnotationDrawerSuite.
 
 # Build and run:
 Use Xcode 11.3 (not the latest Xcode).
@@ -32,10 +32,10 @@ Set Rez Search Path to: `./../common/mac`
 
 # Development notes:
 
-## Use *notes* for debug output
-I used the Attributes panel for debug output. Each Illustrator object can have a user note (string) that is displayed in the Attributes panel. This is usually empty, and can be set with `SetNote` from the `AIArtSuite`.
-
 ## PICA means the host (Adobe Illustrator) application
+
+## *SetNote* can be used for debug output
+I used the Attributes panel for debug output. Each Illustrator object can have a user note (string) that is displayed in the Attributes panel. This is usually empty, and can be set with `SetNote` from the `AIArtSuite`.
 
 ## Plug-in notifiers and timers
 Plug-in notifiers and timers are used by a plug-in to have Illustrator inform it of certain events.
