@@ -6,6 +6,8 @@
 //
 
 #include "IllustratorSDK.h"
+#include "AIAnnotator.h"
+#include "AIAnnotatorDrawer.h"
 
 // Tell Xcode to export the following symbols
 #if defined(__GNUC__)
@@ -21,35 +23,38 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message);
 #endif
 
 extern "C" {
-// the basic suite for loading/unloading other suites
-// it only takes two selectors, startup and shutdown
-SPBasicSuite *sSPBasic = NULL;
+	// the basic suite for loading/unloading other suites
+	// it only takes two selectors, startup and shutdown
+	SPBasicSuite *sSPBasic = NULL;
 
- // helper suite for strings
-AIUnicodeStringSuite *sAIUnicodeString = NULL;
+	 // helper suite for strings
+	AIUnicodeStringSuite *sAIUnicodeString = NULL;
 
-// suite for managing memory
-SPBlocksSuite *sSPBlocks = NULL;
+	// suite for managing memory (also used in IAIUnicodeString helper suite).
+	SPBlocksSuite *sSPBlocks = NULL;
 
-// suite for illustrator paths
-AIPathSuite *sAIPath = NULL;
+	// get-set art objects attributes
+	AIArtSuite *sAIArt = NULL;
 
-// load art suite
-AIArtSuite *sAIArt = NULL;
+	// suite for handling art objects paths
+	AIPathSuite *sAIPath = NULL;
 
-// load memory handling suite
-AIMdMemorySuite *sAIMdMemory = NULL;
+	// load-unload memory handling suite
+	AIMdMemorySuite *sAIMdMemory = NULL;
 
-// suite for getting selected art
-AIMatchingArtSuite *sAIMatchingArt = NULL;
+	// suite for getting a list of currently selected art
+	AIMatchingArtSuite *sAIMatchingArt = NULL;
 
-// suite for notifier events
-AINotifierSuite *sAINotifier = NULL;
+	// suite for adding notifiers (listen for specific events)
+	AINotifierSuite *sAINotifier = NULL;
 
-// suite for unit conversions, progressbars, displaying message alerts etc
-AIUserSuite *sAIUser = NULL;
+	// suite for displaying message alerts, unit conversions, progressbars etc
+	AIUserSuite *sAIUser = NULL;
+
+	// draw annotations that are not a part of the artwork
+	AIAnnotatorSuite * sAIAnnotator = NULL;
+	AIAnnotatorDrawerSuite *sAIAnnotatorDrawer = NULL;
 }
-
 
 extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 	ASErr error = kNoErr;
@@ -60,20 +65,22 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 		
 		// acquire the suites we need
 		error = sSPBasic->AcquireSuite(kAIUserSuite, kAIUserSuiteVersion, (const void**) &sAIUser);
-		error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
 		error = sSPBasic->AcquireSuite(kSPBlocksSuite, kSPBlocksSuiteVersion, (const void**) &sSPBlocks);
 		error = sSPBasic->AcquireSuite(kAIMdMemorySuite, kAIMdMemoryVersion, (const void**) &sAIMdMemory);
+		error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
 		
 		// START UP MESSAGE RECIEVED
 		// different messages depending on if we got a startup or a shutdown selector message
 		if(sSPBasic->IsEqual(selector, kSPInterfaceStartupSelector)) {
 			sAIUser->MessageAlert(ai::UnicodeString("PointView plug-in loaded!"));
 
-			// load the notifier and paths
+			// load suites
 			error = sSPBasic->AcquireSuite(kAINotifierSuite, kAINotifierVersion, (const void**) &sAINotifier);
 			error = sSPBasic->AcquireSuite(kAIMatchingArtSuite, kAIMatchingArtVersion, (const void**) &sAIMatchingArt);
 			error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
 			error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
+			error = sSPBasic->AcquireSuite(kAIAnnotatorSuite, kAIAnnotatorVersion, (const void**) &sAIAnnotator);
+			error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
 
 			// add a notifier for selection change events
 			char notifierName[kMaxStringLength];
@@ -105,15 +112,16 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 				
 				for(int i=0; (error==kNoErr) && (i<artObjectsCount); i++) {
 					AIArtHandle art = (*artObjectsHandle)[i];
-					char artNote[20];
+					char artNote[kMaxStringLength];
 					bool closed;
 					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
 					
 					ai::int16 segmentCount;
 					error = sAIPath->GetPathSegmentCount(art, &segmentCount);
 					
-					if(error == kNoErr && closed) {
-						sprintf(artNote, "Closed, with %d points.", segmentCount);
+					// if(error == kNoErr && closed) {
+					if(closed) {
+						sprintf(artNote, "Closed, with %d points", segmentCount);
 					} else {
 
 						// TODO: the selected path is open find the in and out points print the positions to art object notes!
@@ -126,38 +134,22 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 						
 						sprintf(artNote, "Open path, with %d points.\nStart point at %lf %lf\nEnd point at %lf %lf", segmentCount, startPointH, startPointV, endPointH, endPointV);
 					}
-					// view any art object's note in the Attributes panel.
+					// Set object's note (string) in the Attributes panel.
 					error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
 				}
 				
+				/*
+				// Alert message: "Selected art: n objects"
 				char selectedArtAlertMessage[kMaxStringLength];
-				sprintf(selectedArtAlertMessage, "Selected art: %d", artObjectsCount-1);
-				//ilsAIUser->MessageAlert(ai::UnicodeString(selectedArtAlertMessage));
-				
+				sprintf(selectedArtAlertMessage, "Selected art: %d objects", artObjectsCount-1);
+				sAIUser->MessageAlert(ai::UnicodeString(selectedArtAlertMessage));
+				*/
+				 
 				// free the selected art memory block
 				error = sAIMdMemory->MdMemoryDisposeHandle((AIMdMemoryHandle) artObjectsHandle);
 			}
 		}
 	}
 	
-
 	return error;
 }
-
-
-
-// set up a listener for paths?
-// kAIArtSelectionChangedNotifier
-		
-/*
-	 AIAPI AIErr(* AINotifierSuite::AddNotifier)(SPPluginRef self, const char *name, const char *type, AINotifierHandle *notifier)
-	 Registers interest in a notification.
-
-	 Use at startup.
-
-	 Parameters:
-	 self 	This plug-in.
-	 name 	The unique identifying name of this plug-in.
-	 type 	The notification type, as defined in the related suite. See Plug-in Notifiers.
-	 notifier 	[out] A buffer in which to return the notifier reference. If your plug-in installs multiple notifications, store this in ' globals to compare when receiving a notification.
-*/
