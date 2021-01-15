@@ -35,7 +35,7 @@ Set Rez Search Path to: `./../common/mac`
 ## Use *notes* for debug output
 I used the Attributes panel for debug output. Each Illustrator object can have a user note (string) that is displayed in the Attributes panel. This is usually empty, and can be set with `SetNote` from the `AIArtSuite`.
 
-## PICA means the host application
+## PICA means the host (Adobe Illustrator) application
 
 ## Plug-in notifiers and timers
 Plug-in notifiers and timers are used by a plug-in to have Illustrator inform it of certain events.
