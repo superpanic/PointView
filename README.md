@@ -2,6 +2,8 @@
 I'm trying to build an Adobe Illustrator plug-in that visually displays path endpoints. (A tool I need when editing imported CAD artwork.) The idea is to draw small circles or triangles around all open path's end points using the current layer specific selection color. The circles should not be part of the artwork, but is drawn on the UI layer; something I hope to accomplish using the AIAnnotationDrawerSuite.
 
 # Build and run:
+Use Xcode 11.3 (not the latest Xcode).
+
 1. Download the Illustrator SDK  
 `https://console.adobe.io/downloads/ai`
 
@@ -13,11 +15,7 @@ I'm trying to build an Adobe Illustrator plug-in that visually displays path end
 
 5. Restart Illustrator
 
-# Additional setup needed for the HelloWorld project:
-
-## Use Xcode 11.3  
-Do not use the latest Xcode.
-
+# Additional setup needed for the HelloWorld project:  
 These things seems to be missing in the SDK documentation for the HelloWorld project setup for Macos Xcode.
 
 ## Add Core Foundation
