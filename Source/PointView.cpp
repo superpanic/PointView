@@ -6,8 +6,8 @@
 //
 
 #include "IllustratorSDK.h"
-#include "AIAnnotator.h"
-#include "AIAnnotatorDrawer.h"
+#include "AIAnnotator.h" // not included in IllustratorSDK.h
+#include "AIAnnotatorDrawer.h" // not included in IllustratorSDK.h
 
 // Tell Xcode to export the following symbols
 #if defined(__GNUC__)
@@ -22,38 +22,54 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message);
 #pragma GCC visibility pop
 #endif
 
+// SUITES
 extern "C" {
 	// the basic suite for loading/unloading other suites
 	// it only takes two selectors, startup and shutdown
 	SPBasicSuite *sSPBasic = NULL;
-
 	 // helper suite for strings
 	AIUnicodeStringSuite *sAIUnicodeString = NULL;
-
 	// suite for managing memory (also used in IAIUnicodeString helper suite).
 	SPBlocksSuite *sSPBlocks = NULL;
-
 	// get-set art objects attributes
 	AIArtSuite *sAIArt = NULL;
-
 	// suite for handling art objects paths
 	AIPathSuite *sAIPath = NULL;
-
 	// load-unload memory handling suite
 	AIMdMemorySuite *sAIMdMemory = NULL;
-
 	// suite for getting a list of currently selected art
 	AIMatchingArtSuite *sAIMatchingArt = NULL;
-
 	// suite for adding notifiers (listen for specific events)
 	AINotifierSuite *sAINotifier = NULL;
-
 	// suite for displaying message alerts, unit conversions, progressbars etc
 	AIUserSuite *sAIUser = NULL;
-
 	// draw annotations that are not a part of the artwork
 	AIAnnotatorSuite * sAIAnnotator = NULL;
 	AIAnnotatorDrawerSuite *sAIAnnotatorDrawer = NULL;
+	AIAnnotatorHandle gAnnotatorHandle;
+}
+
+// GLOBALS
+typedef struct {
+	ai::int32 artObjectsCount;
+	AIArtHandle **artObjectsHandle;
+	AIAnnotatorHandle annotatorHandle;
+} Globals;
+
+Globals *g = nullptr;
+
+static AIErr FreeGlobals( SPInterfaceMessage *message ) {
+	AIErr error = kNoErr; if ( g != nil ) {
+		message->d.basic->FreeBlock(g); g = nil;
+		message->d.globals = nil;
+	}
+	return error;
+}
+
+static AIErr AllocateGlobals( SPInterfaceMessage *message ) {
+	AIErr error = kNoErr;
+	error = message->d.basic->AllocateBlock( sizeof(Globals), (void **) &g );
+	return error;
 }
 
 extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
@@ -87,31 +103,41 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 			sprintf(notifierName, "PointView Art Selection Notifier");
 			error = sAINotifier->AddNotifier(msgData->self, notifierName, kAIArtSelectionChangedNotifier, NULL);
 			
+			// register plug-in as annotator
+			error = sAIAnnotator->AddAnnotator(msgData->self, "PointView Annotator", &gAnnotatorHandle);
+			
+			AllocateGlobals((SPInterfaceMessage *)message);
+			
 		// SHUT DOWN MESSAGE RECIEVED
 		} else if(sSPBasic->IsEqual(selector, kSPInterfaceShutdownSelector)) {
+
 			// release the notifier suite and the path suite
 			error = sSPBasic->ReleaseSuite(kAINotifierSuite, kAINotifierVersion);
 			error = sSPBasic->ReleaseSuite(kAIMatchingArtSuite, kAIMatchingArtVersion);
 			error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
 			error = sSPBasic->ReleaseSuite(kAIArtSuite, kAIArtVersion);
+			error = sSPBasic->ReleaseSuite(kAIAnnotatorSuite, kAIAnnotatorVersion);
+			error = sSPBasic->ReleaseSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion);
 			
 			// release user suite and unicode string helper suite
-			error = sSPBasic->ReleaseSuite(kAIMdMemorySuite, kAIMdMemoryVersion);
-			error = sSPBasic->ReleaseSuite(kAIUserSuite, kAIUserSuiteVersion);
 			error = sSPBasic->ReleaseSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion);
+			error = sSPBasic->ReleaseSuite(kAIMdMemorySuite, kAIMdMemoryVersion);
+			error = sSPBasic->ReleaseSuite(kSPBlocksSuite, kSPBlocksSuiteVersion);
+			error = sSPBasic->ReleaseSuite(kAIUserSuite, kAIUserSuiteVersion);
+			
+			FreeGlobals((SPInterfaceMessage *)message);
+			
 		}
 		
 	// NOTIFICATION MESSAGE RECIEVED
 	} else if(sSPBasic->IsEqual(caller, kCallerAINotify)) { // we got a notification!
-		if(sAIMatchingArt) { // is the matching art suite loaded?
-			if( sAIMatchingArt->IsSomeArtSelected() ) { // is any art selected?
+		if(sAIMatchingArt) {
+			if( sAIMatchingArt->IsSomeArtSelected() ) {
+								
+				error = sAIMatchingArt->GetSelectedArt(&g->artObjectsHandle, &g->artObjectsCount);
 				
-				ai::int32 artObjectsCount;
-				AIArtHandle **artObjectsHandle = NULL;
-				error = sAIMatchingArt->GetSelectedArt(&artObjectsHandle, &artObjectsCount);
-				
-				for(int i=0; (error==kNoErr) && (i<artObjectsCount); i++) {
-					AIArtHandle art = (*artObjectsHandle)[i];
+				for(int i=0; (error==kNoErr) && (i<g->artObjectsCount); i++) {
+					AIArtHandle art = (*g->artObjectsHandle)[i];
 					char artNote[kMaxStringLength];
 					bool closed;
 					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
@@ -146,10 +172,25 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 				*/
 				 
 				// free the selected art memory block
-				error = sAIMdMemory->MdMemoryDisposeHandle((AIMdMemoryHandle) artObjectsHandle);
+				//error = sAIMdMemory->MdMemoryDisposeHandle((AIMdMemoryHandle) artObjectsHandle);
 			}
 		}
+	} else if(sSPBasic->IsEqual(caller, kCallerAIAnnotation)) {
+		/*
+		AIAnnotatorMessage *annotatorMessage = (AIAnnotatorMessage *)message;
+		AIAnnotatorDrawer *annotatorDrawer = (AIAnnotatorDrawer *)annotatorMessage->drawer;
+		if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
+			// update annotation
+			// the message contains information about the document view and more..
+			AIRect annotatorRect;
+			
+			error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, &annotatorRect, false);
+		} else if(sSPBasic->IsEqual(selector, kSelectorAIInvalAnnotation) {
+			// inval annotation (whatever that means?)
+			// the message contains information about the document view and more..
+		*/
 	}
-	
+		 
 	return error;
 }
+
