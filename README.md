@@ -1,5 +1,7 @@
-# Plug-in that display endpoints of open paths:
-An Adobe Illustrator plug-in that visually highlights path endpoints. (A tool I need when editing imported CAD artwork.) The idea is to draw small circles around all open path's end points using the current layer specific selection color. The circles should not be part of the artwork, but is drawn on the UI layer; using the AIAnnotationDrawerSuite.  
+# Plug-in for Adobe Illustrator
+An Adobe Illustrator plug-in that visually highlights path endpoints. (A tool I need when editing imported CAD artwork.) The idea is to draw small circles around all open path's end points using the current layer specific selection color. The circles should not be part of the artwork, but is drawn on the UI layer; using the AIAnnotationDrawerSuite. 
+
+![PointView path selection](http://superpanic.com/pointview/pvart.png)
 
 Written in C.  
 
@@ -63,4 +65,4 @@ All plugin's recieve at least four message actions (during it's lifetime):
 `shutdown`  
 
 `reload` seems to be called before `startup`
-and probably `unload` before `shutdown`
+and probably `unload` before `shutdown`for 
