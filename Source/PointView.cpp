@@ -22,30 +22,32 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message);
 #pragma GCC visibility pop
 #endif
 
-static AIErr PointView_FreeGlobals(SPInterfaceMessage *message);
-static AIErr PointView_AllocateGlobals(SPInterfaceMessage *message);
-static AIErr PointView_MessageAlert(char *string);
+AIErr PointView_FreeGlobals(SPInterfaceMessage *message);
+AIErr PointView_AllocateGlobals(SPInterfaceMessage *message);
+AIErr PointView_MessageAlert(char *string);
 
 // SUITES
 extern "C" {
 	// the basic suite for loading/unloading other suites
-	// it only takes two selectors, startup and shutdown
+	// it only takes two selectors, startup and shutdown:
 	SPBasicSuite *sSPBasic = NULL;
-	 // helper suite for strings
+	 // helper suite for strings:
 	AIUnicodeStringSuite *sAIUnicodeString = NULL;
-	// suite for managing memory (also used in IAIUnicodeString helper suite).
+	// suite for managing memory (also used in IAIUnicodeString helper suite):
 	SPBlocksSuite *sSPBlocks = NULL;
-	// get-set art objects attributes
+	// get-set art objects attributes:
 	AIArtSuite *sAIArt = NULL;
-	// suite for handling art objects paths
+	// suite for handling art objects paths:
 	AIPathSuite *sAIPath = NULL;
-	// suite for getting a list of currently selected art
+	// suite for getting a list of currently selected art:
 	AIMatchingArtSuite *sAIMatchingArt = NULL;
-	// suite for adding notifiers (listen for specific events)
+	// suite for adding notifiers (listen for specific events):
 	AINotifierSuite *sAINotifier = NULL;
-	// suite for displaying message alerts, unit conversions, progressbars etc
+	// suite for displaying message alerts, unit conversions, progressbars etc:
 	AIUserSuite *sAIUser = NULL;
-	// draw annotations that are not a part of the artwork
+	// suite for converting document and art coordinates to view coordinates:
+	AIDocumentViewSuite *sAIDocumentView = NULL;
+	// draw annotations that are not a part of the artwork:
 	AIAnnotatorSuite * sAIAnnotator = NULL;
 	AIAnnotatorDrawerSuite *sAIAnnotatorDrawer = NULL;
 	AIAnnotatorHandle gAnnotatorHandle;
@@ -53,12 +55,15 @@ extern "C" {
 
 // GLOBALS
 typedef struct {
-	ai::int32 artObjectsCount;
+	ai::int32 artObjectsCount = 0;
 	AIArtHandle **artObjectsHandle;
 	AIAnnotatorHandle annotatorHandle;
 } Globals;
 
 Globals *g = nullptr;
+
+const AIRGBColor ANNOTATION_COLOR = {65000, 0, 0};
+const float PV_RADIUS = 5.0;
 
 extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 	ASErr error = kNoErr;
@@ -71,8 +76,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 		// different messages depending on if we got a startup or a shutdown selector message
 		if(sSPBasic->IsEqual(selector, kSPInterfaceStartupSelector)) {
 			
-			char s[kMaxStringLength];
-			sprintf(s, "PointView plug-in loaded!");
+			char s[] = "PointView plug-in loaded!";
 			PointView_MessageAlert(s);
 			
 			// add a notifier for selection change events
@@ -103,6 +107,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 			error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
 			
 			error = sAIMatchingArt->GetSelectedArt(&g->artObjectsHandle, &g->artObjectsCount);
+			
 			for(int i=0; (error==kNoErr) && (i<g->artObjectsCount); i++) {
 				AIArtHandle art = (*g->artObjectsHandle)[i];
 				char artNote[kMaxStringLength];
@@ -128,7 +133,14 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 					sprintf(artNote, "Open path, with %d points.\nStart point at %lf %lf\nEnd point at %lf %lf", segmentCount, startPointH, startPointV, endPointH, endPointV);
 				}
 				// Set object's note (string) in the Attributes panel.
+
+				if (sSPBlocks==nullptr) error = sSPBasic->AcquireSuite(kSPBlocksSuite, kSPBlocksSuiteVersion, (const void**) &sSPBlocks);
+				if (sAIUnicodeString==nullptr) error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
+				
 				error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
+				
+				error = sSPBasic->ReleaseSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion);
+				error = sSPBasic->ReleaseSuite(kSPBlocksSuite, kSPBlocksSuiteVersion);
 			}
 			
 			error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
@@ -137,62 +149,147 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 		error = sSPBasic->ReleaseSuite(kAIMatchingArtSuite, kAIMatchingArtVersion);
 		
 	} else if(sSPBasic->IsEqual(caller, kCallerAIAnnotation)) {
-		error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
-
-		/*
+		
 		AIAnnotatorMessage *annotatorMessage = (AIAnnotatorMessage *)message;
 		AIAnnotatorDrawer *annotatorDrawer = (AIAnnotatorDrawer *)annotatorMessage->drawer;
-		if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
-			// update annotation
-			// the message contains information about the document view and more..
-			AIRect annotatorRect;
+
+		if(sSPBasic->IsEqual(selector, kSelectorAIInvalAnnotation)) {
+			error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void**) &sAIDocumentView);
+			error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
 			
-			error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, &annotatorRect, false);
-		} else if(sSPBasic->IsEqual(selector, kSelectorAIInvalAnnotation) {
-			// inval annotation (whatever that means?)
-			// the message contains information about the document view and more..
-		*/
-		error = sSPBasic->ReleaseSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion);
+			AIRealRect updateRect;
+			AIRect portBounds;
+			//error = sAIDocumentView->GetDocumentViewBounds( NULL ,&updateRect);
+			error = sAIDocumentView->GetDocumentViewInvalidRect( NULL ,&updateRect);
+			portBounds.left = _AIRealRoundToShort(updateRect.left) - 1;
+			portBounds.top = _AIRealRoundToShort(updateRect.top) + 1;
+			portBounds.right = _AIRealRoundToShort(updateRect.right) + 1;
+			portBounds.bottom = _AIRealRoundToShort(updateRect.bottom) - 1;
+			
+			sAIAnnotator->InvalAnnotationRect(NULL, &portBounds);
+			
+			error = sSPBasic->ReleaseSuite(kAIDocumentViewSuite, kAIDocumentViewVersion);
+			error = sSPBasic->ReleaseSuite(kAIDocumentViewSuite, kAIDocumentViewVersion);
+			
+		}
+		
+		if(g->artObjectsCount > 0) {
+			if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
+				error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
+				error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
+				error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
+				error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void**) &sAIDocumentView);
+
+				for(int i=0; i<g->artObjectsCount; i++) {
+					
+					AIArtHandle art = (*g->artObjectsHandle)[i];
+					
+					bool closed;
+					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
+					
+					if(!closed) {
+						
+						ai::int16 segmentCount;
+						error = sAIPath->GetPathSegmentCount(art, &segmentCount);
+						
+						if(segmentCount>1) {
+							AIPathSegment segments[segmentCount];
+							error = sAIPath->GetPathSegments(art, 0, segmentCount, segments);
+							
+							// to access AIPoint x, y values use p.h, p.v
+							AIRealPoint startPointArt = segments[0].p;
+							AIRealPoint endPointArt = segments[segmentCount-1].p;
+							
+							AIPoint startPointView;
+							AIPoint endPointView;
+							
+							error = sAIDocumentView->ArtworkPointToViewPoint(NULL, &startPointArt, &startPointView);
+							error = sAIDocumentView->ArtworkPointToViewPoint(NULL, &endPointArt, &endPointView);
+							
+							AIRect startRect;
+							startRect.left = startPointView.h-PV_RADIUS;
+							startRect.right = startPointView.h+PV_RADIUS;
+							startRect.top = startPointView.v-PV_RADIUS;
+							startRect.bottom = startPointView.v+PV_RADIUS;
+							
+							AIRect endRect;
+							endRect.left = endPointView.h-PV_RADIUS;
+							endRect.right = endPointView.h+PV_RADIUS;
+							endRect.top = endPointView.v-PV_RADIUS;
+							endRect.bottom = endPointView.v+PV_RADIUS;
+							
+							sAIAnnotatorDrawer->SetColor(annotatorDrawer, ANNOTATION_COLOR);
+							sAIAnnotatorDrawer->SetLineWidth(annotatorDrawer, 1);
+							
+							error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, startRect, false);
+							error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, endRect, false);
+						}
+					}
+				}
+				
+				error = sSPBasic->ReleaseSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion);
+				error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
+				error = sSPBasic->ReleaseSuite(kAIArtSuite, kAIArtVersion);
+				error = sSPBasic->ReleaseSuite(kAIDocumentViewSuite, kAIDocumentViewVersion);
+			} // end if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation))
+		} // end if(g->artObjectsCount > 0)
+		
 	}
 		 
 	return error;
 }
 
-static AIErr PointView_FreeGlobals(SPInterfaceMessage *message) {
-	AIErr error = kNoErr; if ( g != nil ) {
+	
+// ###
+
+AIErr PointView_FreeGlobals(SPInterfaceMessage *message) {
+	AIErr error = kNoErr;
+	if ( g != nil ) {
 		message->d.basic->FreeBlock(g); g = nil;
 		message->d.globals = nil;
 	}
 	return error;
 }
 
-static AIErr PointView_AllocateGlobals(SPInterfaceMessage *message) {
+AIErr PointView_AllocateGlobals(SPInterfaceMessage *message) {
 	AIErr error = kNoErr;
 	error = message->d.basic->AllocateBlock( sizeof(Globals), (void **) &g );
 	return error;
 }
 
-static AIErr PointView_MessageAlert(char *string) {
+AIErr PointView_MessageAlert(char *string) {
 	ASErr error = kNoErr;
-	
-	if (sAIUser==nullptr) error = sSPBasic->AcquireSuite(kAIUserSuite, kAIUserSuiteVersion, (const void**) &sAIUser);
-	if (sSPBlocks==nullptr) error = sSPBasic->AcquireSuite(kSPBlocksSuite, kSPBlocksSuiteVersion, (const void**) &sSPBlocks);
-	if (sAIUnicodeString==nullptr) error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
+	bool userSuiteOpened = false;
+	bool blocksSuiteOpened = false;
+	bool unicodeSuiteOpened = false;
+	if (sAIUser==nullptr) {
+		error = sSPBasic->AcquireSuite(kAIUserSuite, kAIUserSuiteVersion, (const void**) &sAIUser);
+		userSuiteOpened = true;
+	}
+	if (sSPBlocks==nullptr) {
+		error = sSPBasic->AcquireSuite(kSPBlocksSuite, kSPBlocksSuiteVersion, (const void**) &sSPBlocks);
+		blocksSuiteOpened = true;
+	}
+	if (sAIUnicodeString==nullptr) {
+		error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
+		unicodeSuiteOpened = true;
+	}
 	
 	sAIUser->MessageAlert(ai::UnicodeString(string));
 	
-	if (sAIUnicodeString!=nullptr) {
+	if (sAIUnicodeString!=nullptr && unicodeSuiteOpened) {
 		error = sSPBasic->ReleaseSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion);
 		sAIUnicodeString = nullptr;
 	}
-	if (sSPBlocks!=nullptr) {
+	if (sSPBlocks!=nullptr && blocksSuiteOpened) {
 		error = sSPBasic->ReleaseSuite(kSPBlocksSuite, kSPBlocksSuiteVersion);
 		sSPBlocks = nullptr;
 	}
-	if (sAIUser!=nullptr) {
+	if (sAIUser!=nullptr && userSuiteOpened) {
 		error = sSPBasic->ReleaseSuite(kAIUserSuite, kAIUserSuiteVersion);
 		sAIUser = nullptr;
 	}
 	
 	return error;
 }
+
