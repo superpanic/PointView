@@ -37,6 +37,8 @@ extern "C" {
 	SPBlocksSuite *sSPBlocks = NULL;
 	// get-set art objects attributes:
 	AIArtSuite *sAIArt = NULL;
+	// suite for layers:
+	AILayerSuite *sAILayer = NULL;
 	// suite for handling art objects paths:
 	AIPathSuite *sAIPath = NULL;
 	// suite for getting a list of currently selected art:
@@ -62,8 +64,7 @@ typedef struct {
 
 Globals *g = nullptr;
 
-const AIRGBColor ANNOTATION_COLOR = {65000, 0, 0};
-const float PV_RADIUS = 5.0;
+const float PV_RADIUS = 10.0;
 
 extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 	ASErr error = kNoErr;
@@ -173,14 +174,18 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 			
 		}
 		
-		if(g->artObjectsCount > 0) {
+		if(g->artObjectsCount > 1) {
 			if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
 				error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
+				error = sSPBasic->AcquireSuite(kAILayerSuite, kAILayerVersion, (const void**) &sAILayer);
 				error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
 				error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
 				error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void**) &sAIDocumentView);
-
-				for(int i=0; i<g->artObjectsCount; i++) {
+				
+				AIRGBColor annotationColor;
+				AILayerHandle artLayer;
+				
+				for(int i=1; i<g->artObjectsCount; i++) {
 					
 					AIArtHandle art = (*g->artObjectsHandle)[i];
 					
@@ -188,6 +193,9 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
 					
 					if(!closed) {
+						
+						error = sAIArt->GetLayerOfArt(art, &artLayer);
+						error = sAILayer->GetLayerColor(artLayer, &annotationColor);
 						
 						ai::int16 segmentCount;
 						error = sAIPath->GetPathSegmentCount(art, &segmentCount);
@@ -218,8 +226,8 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 							endRect.top = endPointView.v-PV_RADIUS;
 							endRect.bottom = endPointView.v+PV_RADIUS;
 							
-							sAIAnnotatorDrawer->SetColor(annotatorDrawer, ANNOTATION_COLOR);
-							sAIAnnotatorDrawer->SetLineWidth(annotatorDrawer, 1);
+							sAIAnnotatorDrawer->SetColor(annotatorDrawer, annotationColor);
+							sAIAnnotatorDrawer->SetLineWidth(annotatorDrawer, 2);
 							
 							error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, startRect, false);
 							error = sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, endRect, false);
@@ -230,6 +238,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 				error = sSPBasic->ReleaseSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion);
 				error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
 				error = sSPBasic->ReleaseSuite(kAIArtSuite, kAIArtVersion);
+				error = sSPBasic->ReleaseSuite(kAILayerSuite, kAILayerVersion);
 				error = sSPBasic->ReleaseSuite(kAIDocumentViewSuite, kAIDocumentViewVersion);
 			} // end if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation))
 		} // end if(g->artObjectsCount > 0)
