@@ -7,6 +7,8 @@ Written in C.
 
 Based on the HelloWorld project from the `getting-started-guide.pdf` in [Adobe Illustrator SDK Docs](https://console.adobe.io/downloads/ai).  
 
+Next step: add menu item for turning functionality on/off. 
+
 # Build and run:
 Use Xcode 11.3 (not the latest Xcode).
 
