@@ -99,56 +99,6 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 			PointView_FreeGlobals((SPInterfaceMessage *)message);
 		}
 		
-	// NOTIFICATION MESSAGE RECIEVED
-	} else if(sSPBasic->IsEqual(caller, kCallerAINotify)) { // we got a notification!
-		
-		error = sSPBasic->AcquireSuite(kAIMatchingArtSuite, kAIMatchingArtVersion, (const void**) &sAIMatchingArt);
-		if( sAIMatchingArt->IsSomeArtSelected() ) {
-			error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
-			error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
-			
-			error = sAIMatchingArt->GetSelectedArt(&g->artObjectsHandle, &g->artObjectsCount);
-			
-			for(int i=0; (error==kNoErr) && (i<g->artObjectsCount); i++) {
-				AIArtHandle art = (*g->artObjectsHandle)[i];
-				char artNote[kMaxStringLength];
-				bool closed;
-				error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
-				
-				ai::int16 segmentCount;
-				error = sAIPath->GetPathSegmentCount(art, &segmentCount);
-				
-				// if(error == kNoErr && closed) {
-				if(closed) {
-					sprintf(artNote, "Closed, with %d points", segmentCount);
-				} else {
-
-					// TODO: the selected path is open find the in and out points print the positions to art object notes!
-					AIPathSegment segments[segmentCount];
-					error = sAIPath->GetPathSegments(art, 0, segmentCount, segments);
-					AIReal startPointH = segments[0].p.h;
-					AIReal startPointV = segments[0].p.v;
-					AIReal endPointH = segments[segmentCount-1].p.h;
-					AIReal endPointV = segments[segmentCount-1].p.v;
-					
-					sprintf(artNote, "Open path, with %d points.\nStart point at %lf %lf\nEnd point at %lf %lf", segmentCount, startPointH, startPointV, endPointH, endPointV);
-				}
-				// Set object's note (string) in the Attributes panel.
-
-				if (sSPBlocks==nullptr) error = sSPBasic->AcquireSuite(kSPBlocksSuite, kSPBlocksSuiteVersion, (const void**) &sSPBlocks);
-				if (sAIUnicodeString==nullptr) error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void**) &sAIUnicodeString);
-				
-				error = sAIArt->SetNote(art,ai::UnicodeString(artNote));
-				
-				error = sSPBasic->ReleaseSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion);
-				error = sSPBasic->ReleaseSuite(kSPBlocksSuite, kSPBlocksSuiteVersion);
-			}
-			
-			error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
-			error = sSPBasic->ReleaseSuite(kAIArtSuite, kAIArtVersion);
-		}
-		error = sSPBasic->ReleaseSuite(kAIMatchingArtSuite, kAIMatchingArtVersion);
-		
 	} else if(sSPBasic->IsEqual(caller, kCallerAIAnnotation)) {
 		
 		AIAnnotatorMessage *annotatorMessage = (AIAnnotatorMessage *)message;
@@ -174,25 +124,40 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 			
 		}
 		
-		if(g->artObjectsCount > 1) {
-			if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
-				error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
-				error = sSPBasic->AcquireSuite(kAILayerSuite, kAILayerVersion, (const void**) &sAILayer);
-				error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
-				error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
-				error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void**) &sAIDocumentView);
+		if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
+			error = sSPBasic->AcquireSuite(kAIArtSuite, kAIArtVersion, (const void**) &sAIArt);
+			error = sSPBasic->AcquireSuite(kAIMatchingArtSuite, kAIMatchingArtVersion, (const void**) &sAIMatchingArt);
+			error = sSPBasic->AcquireSuite(kAILayerSuite, kAILayerVersion, (const void**) &sAILayer);
+			error = sSPBasic->AcquireSuite(kAIPathSuite, kAIPathVersion, (const void**) &sAIPath);
+			error = sSPBasic->AcquireSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion, (const void**) &sAIAnnotatorDrawer);
+			error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void**) &sAIDocumentView);
+			
+			
+			
+			ai::int32 artObjCount = 0;
+			AIArtHandle **artObjHandle;
+
+			//error = sAIMatchingArt->GetSelectedArt(&g->artObjectsHandle, &g->artObjectsCount);
+			error = sAIMatchingArt->GetSelectedArt(&artObjHandle, &artObjCount);
+			
+			if(artObjCount > 0) {
 				
 				AIRGBColor annotationColor;
 				AILayerHandle artLayer;
 				
-				for(int i=1; i<g->artObjectsCount; i++) {
+				for(int i=0; i<artObjCount; i++) {
 					
-					AIArtHandle art = (*g->artObjectsHandle)[i];
+					//AIArtHandle art = (*g->artObjectsHandle)[i];
+					AIArtHandle art = (*artObjHandle)[i];
+					
+					short artType;
+					error = sAIArt->GetArtType(art, &artType);
+					
 					
 					bool closed;
 					error = sAIPath->GetPathClosed(art, (AIBoolean *)&closed);
 					
-					if(!closed) {
+					if(artType == kPathArt && !closed) {
 						
 						error = sAIArt->GetLayerOfArt(art, &artLayer);
 						error = sAILayer->GetLayerColor(artLayer, &annotationColor);
@@ -238,11 +203,11 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 				error = sSPBasic->ReleaseSuite(kAIAnnotatorDrawerSuite, kAIAnnotatorDrawerVersion);
 				error = sSPBasic->ReleaseSuite(kAIPathSuite, kAIPathVersion);
 				error = sSPBasic->ReleaseSuite(kAIArtSuite, kAIArtVersion);
+				error = sSPBasic->ReleaseSuite(kAIMatchingArtSuite, kAIMatchingArtVersion);
 				error = sSPBasic->ReleaseSuite(kAILayerSuite, kAILayerVersion);
 				error = sSPBasic->ReleaseSuite(kAIDocumentViewSuite, kAIDocumentViewVersion);
 			} // end if(sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation))
-		} // end if(g->artObjectsCount > 0)
-		
+		}
 	}
 		 
 	return error;
