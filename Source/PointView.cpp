@@ -39,13 +39,15 @@ typedef struct {
 
 Globals *g = nullptr;
 
-static ai::int32 POINT_VIEW_RADIUS = 10;
+static ai::int32 START_POINT_SIZE = 8;
+static ai::int32 END_POINT_SIZE = 12;
 static AIReal POINT_VIEW_LINE_WIDTH = 2.0;
 
-static AIErr StartupPlugin(SPInterfaceMessage *message, SPPlugin *self);
-static AIErr ShutdownPlugin(SPInterfaceMessage *message);
-static AIErr DrawAnnotation(void *message);
-static void PointView_SetAIRectSize(AIRect *r, AIPoint *p, ai::int32 radius);
+static AIErr PV_StartupPlugin(SPInterfaceMessage *message, SPPlugin *self);
+static AIErr PV_ShutdownPlugin(SPInterfaceMessage *message);
+static AIErr PV_DrawAnnotation(void *message);
+static void  PV_SetAIRectSize(AIRect *r, AIPoint *p, ai::int32 radius);
+static bool  PV_ArePointsDifferent(AIPoint *p1, AIPoint *p2);
 
 bool PointViewIsActive = true;
 
@@ -62,11 +64,11 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 		error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void **)&sAIUnicodeString);
 
 		if (sSPBasic->IsEqual(selector, kSPInterfaceStartupSelector)) {
-			sAIUser->MessageAlert(ai::UnicodeString("PointView Loaded"));
-			StartupPlugin((SPInterfaceMessage *)message, self);
+			// sAIUser->MessageAlert(ai::UnicodeString("PointView Loaded"));
+			PV_StartupPlugin((SPInterfaceMessage *)message, self);
 		} else if (sSPBasic->IsEqual(selector, kSPInterfaceShutdownSelector)) {
 			// sAIUser->MessageAlert(ai::UnicodeString("Goodbye!"));
-			ShutdownPlugin((SPInterfaceMessage *)message);
+			PV_ShutdownPlugin((SPInterfaceMessage *)message);
 		}
 		
 		// error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void **)&sAIUnicodeString);
@@ -81,7 +83,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 	else if (PointViewIsActive && sSPBasic->IsEqual(caller, kCallerAIAnnotation)) {
 
 		if (sSPBasic->IsEqual(selector, kSelectorAIDrawAnnotation)) {
-			error = DrawAnnotation((AIAnnotatorMessage *)message);
+			error = PV_DrawAnnotation((AIAnnotatorMessage *)message);
 			
 		} else if (sSPBasic->IsEqual(selector, kSelectorAIInvalAnnotation)) {
 			error = sSPBasic->AcquireSuite(kAIDocumentViewSuite, kAIDocumentViewVersion, (const void **)&sAIDocumentView);
@@ -124,7 +126,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 }
 
 
-static AIErr StartupPlugin(SPInterfaceMessage *message, SPPlugin *self) {
+static AIErr PV_StartupPlugin(SPInterfaceMessage *message, SPPlugin *self) {
 	ASErr error = kNoErr;
 	SPBasicSuite* sSPBasic = message->d.basic;
 
@@ -148,7 +150,7 @@ static AIErr StartupPlugin(SPInterfaceMessage *message, SPPlugin *self) {
 }
 
 
-static AIErr ShutdownPlugin(SPInterfaceMessage *message) {
+static AIErr PV_ShutdownPlugin(SPInterfaceMessage *message) {
 	ASErr error = kNoErr;
 	if (g != nullptr) {
 		message->d.basic->FreeBlock(g);
@@ -158,7 +160,7 @@ static AIErr ShutdownPlugin(SPInterfaceMessage *message) {
 	return error;
 }
 
-static AIErr DrawAnnotation(void *message) {
+static AIErr PV_DrawAnnotation(void *message) {
 
 	AIErr error = kNoErr;
 
@@ -206,15 +208,10 @@ static AIErr DrawAnnotation(void *message) {
 
 						AIPoint startPointView;
 						AIPoint endPointView;
-
+						
 						error = sAIDocumentView->ArtworkPointToViewPoint(NULL, &(firstSegment.p), &startPointView);
 						error = sAIDocumentView->ArtworkPointToViewPoint(NULL, &(lastSegment.p), &endPointView);
 
-						AIRect startRect;
-						AIRect endRect;
-
-						PointView_SetAIRectSize(&startRect, &startPointView, POINT_VIEW_RADIUS);
-						PointView_SetAIRectSize(&endRect, &endPointView, POINT_VIEW_RADIUS);
 
 						AILayerHandle layer;
 						sAIArt->GetLayerOfArt(art, &layer);
@@ -224,9 +221,36 @@ static AIErr DrawAnnotation(void *message) {
 
 						sAIAnnotatorDrawer->SetColor(annotatorDrawer, col);
 						sAIAnnotatorDrawer->SetLineWidth(annotatorDrawer, POINT_VIEW_LINE_WIDTH);
+						
+						
+						AIPoint p1;
+						AIPoint p2;
+						
+						p1.h = startPointView.h-START_POINT_SIZE;
+						p1.v = startPointView.v-START_POINT_SIZE;
+						p2.h = startPointView.h+START_POINT_SIZE;
+						p2.v = startPointView.v+START_POINT_SIZE;
+						sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
 
-						sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, startRect, false);
-						sAIAnnotatorDrawer->DrawEllipse(annotatorDrawer, endRect, false);
+						p1.h = startPointView.h+START_POINT_SIZE;
+						p1.v = startPointView.v-START_POINT_SIZE;
+						p2.h = startPointView.h-START_POINT_SIZE;
+						p2.v = startPointView.v+START_POINT_SIZE;
+						sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+						
+						if( PV_ArePointsDifferent(&startPointView, &endPointView) ) {
+							p1.h = endPointView.h-END_POINT_SIZE;
+							p1.v = endPointView.v;
+							p2.h = endPointView.h+END_POINT_SIZE;
+							p2.v = endPointView.v;
+							sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+
+							p1.h = endPointView.h;
+							p1.v = endPointView.v-END_POINT_SIZE;
+							p2.h = endPointView.h;
+							p2.v = endPointView.v+END_POINT_SIZE;
+							sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+						}
 
 					}
 				}
@@ -258,7 +282,11 @@ static AIErr DrawAnnotation(void *message) {
 	return error;
 }
 
-static void PointView_SetAIRectSize(AIRect *r, AIPoint *p, ai::int32 radius) {
+static bool  PV_ArePointsDifferent(AIPoint *p1, AIPoint *p2) {
+	return (p1->h!=p2->h || p1->v!=p2->v);
+}
+
+static void PV_SetAIRectSize(AIRect *r, AIPoint *p, ai::int32 radius) {
 	r->left = p->h - radius;
 	r->right = p->h + radius;
 	r->top = p->v - radius;
