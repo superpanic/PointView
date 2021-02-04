@@ -93,10 +93,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 359F95DD25AB631C001E5826 /* Build configuration list for PBXNativeTarget "PointView" */;
 			buildPhases = (
+				359C61FE25CB1BAE00D712FF /* ShellScript */,
 				359F95D525AB631C001E5826 /* Sources */,
 				359F95D625AB631C001E5826 /* Frameworks */,
 				359F95D725AB631C001E5826 /* Resources */,
 				359F95E525AB66CC001E5826 /* Rez */,
+				359C61FF25CB1CBB00D712FF /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -161,6 +163,43 @@
 		};
 /* End PBXRezBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		359C61FE25CB1BAE00D712FF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python ../../tools/pipl/create_pipl.py -input '[{\"name\":\"PointView\"}]'\n";
+		};
+		359C61FF25CB1CBB00D712FF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p \n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}.aip/Contents/Resources/pipl\"\ncp -f \"plugin.pipl\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}.aip/Contents/Resources/pipl/plugin.pipl\"\nexit\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		359F95D525AB631C001E5826 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -178,7 +217,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AI_CONFIGURATION = debug;
-				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKdebug.pch;
+				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKDebug.pch;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"../common/**",
@@ -201,7 +240,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AI_CONFIGURATION = release;
-				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKrelease.pch;
+				GCC_PREFIX_HEADER = ./../common/includes/IllustratorSDKRelease.pch;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"../common/**",

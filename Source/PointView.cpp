@@ -62,7 +62,7 @@ extern "C" ASAPI ASErr PluginMain(char *caller, char *selector, void *message) {
 		error = sSPBasic->AcquireSuite(kAIUnicodeStringSuite, kAIUnicodeStringSuiteVersion, (const void **)&sAIUnicodeString);
 
 		if (sSPBasic->IsEqual(selector, kSPInterfaceStartupSelector)) {
-			// sAIUser->MessageAlert(ai::UnicodeString("PointView Loaded"));
+			sAIUser->MessageAlert(ai::UnicodeString("PointView Loaded"));
 			StartupPlugin((SPInterfaceMessage *)message, self);
 		} else if (sSPBasic->IsEqual(selector, kSPInterfaceShutdownSelector)) {
 			// sAIUser->MessageAlert(ai::UnicodeString("Goodbye!"));
