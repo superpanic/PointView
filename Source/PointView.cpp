@@ -39,9 +39,9 @@ typedef struct {
 
 Globals *g = nullptr;
 
-static ai::int32 START_POINT_SIZE = 8;
-static ai::int32 END_POINT_SIZE = 12;
-static AIReal POINT_VIEW_LINE_WIDTH = 2.0;
+static ai::int32 START_POINT_SIZE = 6;
+static ai::int32 END_POINT_SIZE = 8;
+static AIReal POINT_VIEW_LINE_WIDTH = 1.0;
 
 static AIErr PV_StartupPlugin(SPInterfaceMessage *message, SPPlugin *self);
 static AIErr PV_ShutdownPlugin(SPInterfaceMessage *message);
@@ -160,6 +160,32 @@ static AIErr PV_ShutdownPlugin(SPInterfaceMessage *message) {
 	return error;
 }
 
+static void PV_DrawCrissShape(AIAnnotatorDrawer *annotatorDrawer, const AIPoint &startPointView, AIPoint &p1, AIPoint &p2) {
+	p1.h = startPointView.h-START_POINT_SIZE;
+	p1.v = startPointView.v-START_POINT_SIZE;
+	p2.h = startPointView.h+START_POINT_SIZE;
+	p2.v = startPointView.v+START_POINT_SIZE;
+	sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+	p1.h = startPointView.h+START_POINT_SIZE;
+	p1.v = startPointView.v-START_POINT_SIZE;
+	p2.h = startPointView.h-START_POINT_SIZE;
+	p2.v = startPointView.v+START_POINT_SIZE;
+	sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+}
+
+static void PV_DrawCrossShape(AIAnnotatorDrawer *annotatorDrawer, const AIPoint &endPointView, AIPoint &p1, AIPoint &p2) {
+	p1.h = endPointView.h-END_POINT_SIZE;
+	p1.v = endPointView.v;
+	p2.h = endPointView.h+END_POINT_SIZE;
+	p2.v = endPointView.v;
+	sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+	p1.h = endPointView.h;
+	p1.v = endPointView.v-END_POINT_SIZE;
+	p2.h = endPointView.h;
+	p2.v = endPointView.v+END_POINT_SIZE;
+	sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+}
+
 static AIErr PV_DrawAnnotation(void *message) {
 
 	AIErr error = kNoErr;
@@ -222,34 +248,13 @@ static AIErr PV_DrawAnnotation(void *message) {
 						sAIAnnotatorDrawer->SetColor(annotatorDrawer, col);
 						sAIAnnotatorDrawer->SetLineWidth(annotatorDrawer, POINT_VIEW_LINE_WIDTH);
 						
-						
 						AIPoint p1;
 						AIPoint p2;
 						
-						p1.h = startPointView.h-START_POINT_SIZE;
-						p1.v = startPointView.v-START_POINT_SIZE;
-						p2.h = startPointView.h+START_POINT_SIZE;
-						p2.v = startPointView.v+START_POINT_SIZE;
-						sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
-
-						p1.h = startPointView.h+START_POINT_SIZE;
-						p1.v = startPointView.v-START_POINT_SIZE;
-						p2.h = startPointView.h-START_POINT_SIZE;
-						p2.v = startPointView.v+START_POINT_SIZE;
-						sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+						PV_DrawCrissShape(annotatorDrawer, startPointView, p1, p2);
 						
 						if( PV_ArePointsDifferent(&startPointView, &endPointView) ) {
-							p1.h = endPointView.h-END_POINT_SIZE;
-							p1.v = endPointView.v;
-							p2.h = endPointView.h+END_POINT_SIZE;
-							p2.v = endPointView.v;
-							sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
-
-							p1.h = endPointView.h;
-							p1.v = endPointView.v-END_POINT_SIZE;
-							p2.h = endPointView.h;
-							p2.v = endPointView.v+END_POINT_SIZE;
-							sAIAnnotatorDrawer->DrawLine(annotatorDrawer, p1, p2);
+							PV_DrawCrossShape(annotatorDrawer, endPointView, p1, p2);
 						}
 
 					}
