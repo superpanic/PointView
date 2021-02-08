@@ -55,8 +55,7 @@ once a second.
 For more information, see AINotifierSuite and AITimerSuite in Adobe Illustrator API Reference.
 
 ## Plug-In Property List
-PiPL is mentioned everywhere in the documentation and seems important. All plug-ins need a PiPL that describes the plugin type etc.
-It seems like all the sample projects share a PiPL file in the `./../common/mac` folder. There is also a PiPL project in the `samplecode` folder.
+PiPL is updated to latest framework and works with Adobe Illustrator 25.1.
 
 ## Plug-ing code entry point
 By convention, the entry point is called `PluginMain` and is compiled with C linkage:  
