@@ -3,7 +3,7 @@ An Adobe Illustrator plug-in that visually highlights path endpoints. (A tool I 
 
 This is the Macos version, [Windows version is found here.](https://github.com/superpanic/PointView_winx64)
 
-![PointView path selection](http://superpanic.com/pointview/pvart.png)
+![PointView path selection](http://superpanic.com/pointview/pvart2.png)
 
 Written in C.  
 
