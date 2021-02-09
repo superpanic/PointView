@@ -1,5 +1,5 @@
 # Plug-in for Adobe Illustrator
-An Adobe Illustrator plug-in that visually highlights path endpoints. (A tool I need when editing imported CAD artwork.) The plug-in draws circles around all end points of selected open paths using the current layer color. The circles are not part of the artwork, but is drawn on the UI layer; using the AIAnnotationDrawerSuite. 
+An Adobe Illustrator plug-in that visually highlights path endpoints. (A tool I need when editing imported CAD artwork.) The plug-in draws a criss and a cross on all start and end points of selected open paths using the current layer color. The circles are not part of the artwork, but is drawn on the UI layer; using the AIAnnotationDrawerSuite. 
 
 This is the Macos version, [Windows version is found here.](https://github.com/superpanic/PointView_winx64)
 
